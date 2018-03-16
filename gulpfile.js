@@ -118,9 +118,9 @@ gulp.task('default', ['serve']);
 
 //压缩整个项目 
 gulp.task('build', ['delete'], function() {
-	gulp.start('script', 'less', 'html', 'lib');
+	gulp.start('script', 'less', 'html', 'lib', 'images');
 
-	browserSync.init({
+	/*browserSync.init({
 		port: 2017,
 		server: {
 			baseDir: ['dist']
@@ -128,5 +128,5 @@ gulp.task('build', ['delete'], function() {
 	});
 	browserSync.reload({
 		stream: true
-	});
+	});*/
 });
