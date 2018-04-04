@@ -4,6 +4,57 @@ html, body {position: relative;height: 100%; overflow:hidden;}
 
 table,td,tr,th{ padding:0; margin:0; border:0}
 
+/*横屏提示*/
+
+@media all and (orientation: landscape) {
+	#Rotation {
+		display: block;
+	}
+}
+
+@media all and (orientation: portrait) {
+	#Rotation {
+		display: none;
+	}
+}
+
+#Rotation {
+	width: 100%;
+	height: 100%;
+	background: url(../images/horizontal.jpg) no-repeat center center;
+	background-color: rgba(0, 0, 0, 0.75);
+	position: absolute;
+	left: 0;
+	top: 0;
+	z-index: 9999999;
+}
+
+.horizontal {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: url(../images/horizontal.jpg);
+	background-size: cover;
+	background-position: 50% 50%;
+	display: none;
+	z-index: 99999;
+}
+
+.vertical {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: url(../images/vertical.jpg);
+	background-size: cover;
+	background-position: 50% 50%;
+	display: none;
+	z-index: 99999;
+}
+
 
 
 #wrapper{position:absolute; width:100%; height:100%; background:#000;}

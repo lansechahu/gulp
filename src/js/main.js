@@ -1,138 +1,7 @@
-var wid, hei;
-var renderer;
-var scene;
-var camera;
-var light;
-var controls;
-var clock, delta;
-
-var cameraBox;
-
-var mouseX = 0;
-var mouseXOnMouseDown = 0;
-var targetX = 0;
-var windowHalfX;
-
-var scale = chroma.scale(['white', 'blue', 'red', 'yellow', 'green']);
-
 $(function() {
-	clock = new THREE.Clock();
-	delta = clock.getDelta();
-
-	getSize(); //获取场景大小
-	initThree(); //初始化Threejs
-	initScene(); //初始化场景
-	initCamera(); //初始化摄像机
-	initControl(); //初始化控制器
-	initLight(); //初始化灯光
-
-	load_sky();
-	create_box();
-
 	initPixi();
-
-	render();
 });
 
-function getSize() {
-	wid = window.innerWidth;
-	hei = window.innerHeight;
-	windowHalfX = wid / 2;
-}
-
-function initThree() {
-	renderer = new THREE.WebGLRenderer({
-		antialias: true,
-		alpha: true,
-		preserveDrawingBuffer: true
-	});
-	renderer.setSize(wid, hei);
-	document.getElementById('canvas-frame').appendChild(renderer.domElement);
-	renderer.setClearColor(0x000000, 1.0);
-}
-
-function initScene() {
-	scene = new THREE.Scene();
-}
-
-function initCamera() {
-	cameraBox = new THREE.Object3D();
-	scene.add(cameraBox);
-
-	camera = new THREE.PerspectiveCamera(45, wid / hei, 1, 2000);
-	camera.position.set(0, 0, 50);
-	cameraBox.add(camera);
-}
-
-function initControl() {
-	/*controls = new THREE.OrbitControls(camera, renderer.domElement);
-	controls.autoRotate = false;*/
-
-	controls = new Controls(cameraBox);
-	controls.init();
-}
-
-function controlState(__state) {
-	controls.enabled = __state;
-}
-
-function initLight() {
-	//环境光
-	light = new THREE.AmbientLight(0xfff000);
-	scene.add(light);
-
-	var light2 = new THREE.DirectionalLight(0xffffff, 1);
-	light2.position.set(20, 20, 30);
-	scene.add(light2);
-
-	var helper2 = new THREE.DirectionalLightHelper(light2);
-	scene.add(helper2);
-
-	var light3 = new THREE.DirectionalLight(0xffffff, 1);
-	light3.position.set(-20, 20, -30);
-	scene.add(light3);
-
-	var helper3 = new THREE.DirectionalLightHelper(light3);
-	scene.add(helper3);
-
-	//scene.add(new THREE.HemisphereLight(0xffffff, 0x999999));
-}
-
-//====================================================================//
-
-function create_box() {
-	var _num = 1;
-	for(var i = 0; i < 5; i++) {
-		var material = new THREE.MeshBasicMaterial({
-			color: scale(Math.random()).hex()
-		});
-		var geom = new THREE.CubeGeometry(3, 3, 3);
-		var mesh = new THREE.Mesh(geom, material);
-		scene.add(mesh);
-		mesh.position.x = (Math.random() * 10) * _num;
-		mesh.position.z = -5 * i;
-		_num *= -1;
-	}
-}
-
-//=======================================================================//
-
-//制作天空盒
-function load_sky() {
-	var skyboxGeometry = new THREE.SphereGeometry(100, 20, 20);
-	var map = new THREE.TextureLoader().load("images/background.jpg");
-	map.wrapT = THREE.RepeatWrapping;
-	var skyboxMaterial = new THREE.MeshBasicMaterial({
-		map: map,
-		side: THREE.BackSide
-	});
-	skyBox = new THREE.Mesh(skyboxGeometry, skyboxMaterial);
-	scene.add(skyBox);
-}
-
-//========================================================================//
-
-//==================================================================================================//
 var wid = window.innerWidth;
 var hei = window.innerHeight;
 
@@ -140,41 +9,130 @@ var app, stage, container;
 var pixiControl;
 
 function initPixi() {
-	app = new PIXI.Application(640, 640 / (wid / hei), {
+	app = new PIXI.CanvasRenderer(640, 640 / (wid / hei), {
 		backgroundColor: 0x000000,
+		forceCanvas: true,
 		transparent: true
 	});
 	document.getElementById('pixiStage').appendChild(app.view);
 
-	stage = app.stage;
+	stage = new PIXI.Container();
 
 	container = new PIXI.Container();
 
 	stage.addChild(container);
 
-	//摇杆
-	pixiControl = new Ball();
-	container.addChild(pixiControl);
-	pixiControl.init();
+	var bg = new PIXI.Graphics();
+	bg.beginFill(0xe37372, 1);
+	bg.drawRect(0, 0, app.view.width, app.view.height);
+	container.addChild(bg);
 
-	pixiControl.x = app.view.width * 0.8 - 0;
-	pixiControl.y = app.view.height * 0.9 - 0;
+	loadingIn(); //正经加载进
+	//zhuanIn();
 
+	animate();
 }
 
-//==================================================================================================//
+var loading;
 
-function render() {
-	delta = clock.getDelta();
+function loadingIn() {
+	var loading_file = [];
+	loading_file.push('images/0.jpg');
+	loading_file.push('images/1.jpg');
+	loading_file.push('images/2.jpg');
+	loading_file.push('images/3.jpg');
+	loading_file.push('images/4.jpg');
+	loading_file.push('images/5.jpg');
 
-	if(controls) {
-		controls.update(delta);
+	var loadingArr = [loading_file];
+	loading = new Loading(null, {
+		loadFileArr: loadingArr,
+		progress: progress,
+		complete: complete,
+		easing: 1
+	});
+	loading.start();
+}
+
+function progress(__pro) {
+	console.log(__pro);
+}
+
+function complete() {
+	console.log('加载完成');
+	loading = null;
+
+	zhuanIn();
+}
+
+var centerX = 0;
+var centerY = 0;
+
+var radiusX = 200; //转的x轴半径
+var radiusY = 100; //转的y轴半径
+
+var scaleRange = [0.8, 0.3]; //前后深度的范围，最小0.8，最大0.8+0.3
+var angleArr = [0, 120, 240]; //初始时各个对象的位置
+
+var eggRSpeed = 1; //转动的速度
+
+var eggArr = [];
+var eggBox;
+
+function zhuanIn() {
+	eggBox = new PIXI.Container();
+	container.addChild(eggBox);
+
+	centerX = app.view.width / 2;
+	centerY = app.view.height / 2;
+
+	for(var i = 0; i < angleArr.length; i++) {
+		var egg = PIXI.Sprite.fromImage('images/egg.png');
+		egg.anchor.set(0.5);
+		eggBox.addChild(egg);
+		egg.angle = angleArr[i];
+		egg.x = centerX + Math.cos(egg.angle * Math.PI / 180) * radiusX;
+		egg.y = centerY + Math.sin(egg.angle * Math.PI / 180) * radiusY;
+		egg.scale.x = egg.scale.y = scaleRange[0] + Math.sin(egg.angle * Math.PI / 180) * scaleRange[1];
+		eggArr.push(egg);
 	}
 
-	if(pixiControl) {
-		pixiControl.update();
+	sortIndex();
+}
+
+function sortIndex() {
+	eggArr = eggArr.sort(sortNumber);
+	for(var i = 0; i < eggArr.length; i++) {
+		eggBox.setChildIndex(eggArr[i], i);
+	}
+}
+
+function sortNumber(a, b) {
+	return a.y - b.y;
+}
+
+//渲染
+function animate() {
+	requestAnimationFrame(animate);
+	pixiUpdate();
+	app.render(stage);
+}
+
+function pixiUpdate() {
+	if(loading) {
+		loading.update();
+	}
+	eggUpdate();
+}
+
+function eggUpdate() {
+	for(var i = 0; i < eggArr.length; i++) {
+		var egg = eggArr[i];
+		egg.angle += eggRSpeed;
+		egg.x = centerX + Math.cos(egg.angle * Math.PI / 180) * radiusX;
+		egg.y = centerY + Math.sin(egg.angle * Math.PI / 180) * radiusY;
+		egg.scale.x = egg.scale.y = scaleRange[0] + Math.sin(egg.angle * Math.PI / 180) * scaleRange[1];
 	}
 
-	requestAnimationFrame(render);
-	renderer.render(scene, camera);
+	sortIndex();
 }

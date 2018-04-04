@@ -1,0 +1,22 @@
+{
+	"libArr":[
+		"lib/jquery-2.1.1.min.js",
+		"lib/TweenMax.min.js",
+		"lib/pixi.min.js",
+		"lib/mathutils.js"
+	],
+	"jsArr": [
+		"js/Project.js",
+		"js/Utils.js",
+		"js/event/Event.js",
+		"js/event/EventDispatcher.js",
+		"js/scene/Scene.js",
+		"js/Loading.js",
+		"js/End.js",
+		"js/Money.js",
+		"js/Lines.js",
+		"js/Egg.js",
+		"js/Game.js",
+		"js/main.js"
+	]
+}

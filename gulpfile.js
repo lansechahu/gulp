@@ -10,6 +10,8 @@ var gulp = require('gulp'),
 del = require('del')
 browserSync = require("browser-sync").create(); //浏览器实时刷新  
 
+var config = require('./config.json');
+
 //删除dist下的所有文件  
 gulp.task('delete', function(cb) {
 	return del(['dist/*', '!dist/images'], cb);
@@ -53,7 +55,16 @@ gulp.task('less', function() {
 
 //压缩js  
 gulp.task("script", function() {
-	gulp.src('./src/js/*.js')
+	//gulp.src(['./src/js/*.js','./src/js/*/*.js'])
+	//console.log(config.jsArr);
+
+	var jsArr = [];
+	for(var i = 0; i < config.jsArr.length; i++) {
+		jsArr.push('./src/' + config.jsArr[i]);
+	}
+	console.log(jsArr);
+
+	gulp.src(jsArr)
 		.pipe(changed('dist/js', {
 			hasChanged: changed.compareSha1Digest
 		}))
@@ -67,7 +78,12 @@ gulp.task("script", function() {
 
 //压缩lib库 
 gulp.task("lib", function() {
-	gulp.src('./src/lib/*.*')
+	var libArr = [];
+	for(var i = 0; i < config.libArr.length; i++) {
+		libArr.push('./src/' + config.libArr[i]);
+	}
+	
+	gulp.src(libArr)
 		.pipe(changed('dist/lib', {
 			hasChanged: changed.compareSha1Digest
 		}))
